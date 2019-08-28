@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Charley Wu">
+    <meta charset="utf-8">
+    <title>Exploration Game</title>
+    <script src="js/jquery-3.2.1.min.js" charset="utf-8"></script> 
+    <script src="js/jquery-ui.min.js" charset="utf-8"></script> 
+    <script src="js/d3.v3.min.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" >
+    <link rel="stylesheet" type="text/css" href="css/grid2D.css">
+    <script type="text/javascript" src="kernelRough.json"></script>  
+ </head>
+    <body> 
+
+    <div id="page0" class="col-xs-4 col-xs-offset-4" style="display:block;">
+        <center>
+        <br>
+        <h1>Welcome!</h1>
+        <form>
+            <fieldset data-role="Participant" data-type="horizontal">
+                <legend>Please enter Participant ID:</legend>
+                <input name="participantId" id="participantId">
+            </fieldset> <br>
+        </form>
+        <br>
+
+       <div style="width:50px;margin:0 auto">
+        <input type="button" class="btn btn-success" onclick="idnext()" value="Continue">
+      </div></div> <!--wenn die Seite nicht vollständig ausgefüllt ist, dann sollte der Button disabled sein-->
+
+    <div class='container' style="width: 95%; height: 95%">
+        <!--First page contains Demographic Information -->
+        <div id="page1" class="col-xs-4 col-xs-offset-4" style="display:none;">
+            <center>
+            <br>
+            <h1>Exploration Game</h1><br>
+            <br>
+               You can start the experiment now.
+               <br>
+            <br>
+            <button style="font-size:28px" class='btn-primary' type="button" name="button"; onclick="assignScenario();" >Start</button>
+
+        </div>
+
+        <div id="page2" class="row" style="display:none">
+             <div class = 'col-md' id="alertGridDiv" style="display:none">
+                <h2>Bonus round!</h2>
+                <p class="text-xl">
+                    We would like to ask you some questions about five different tiles, which have not yet been revealed.
+                     For each tile, we will ask you how many points you think you would get if you were to click it, and how certain you are. Afterwards, you will be allowed to choose one of the five selected tiles, and continue the round as normal.
+                    
+                </p><br><br>
+                <button class='btn-primary text-xl' type="button" name="button" id="buttonGoToBonusLevel" onclick="nextBonusLevelStep();">Weiter</button>
+            </div>
+             <div class="col-md-6" id='gridDiv'> 
+                <table id='grid' class='grid'> <tbody></tbody> </table> 
+            </div>
+            <div class="col-md-6" id='sidePanel' >
+                <div class="row">
+                    <div  class ="col-md" id ='progress' style="text-align: left"> 
+                        <font style="font-size:24px" color="green"><b><div id="scoretotal"></div></b></font>
+                        <div style="font-size:24px"  id="remaining1">Remaining Grids: <b>12</b></div>
+                        <div style="font-size:24px"  id="remaining2">Remaining Clicks: <b>25</b></div> 
+                        <br>
+                    </div>
+                </div>
+                <div class="row">
+                    <div  class="col-md-4" id='starDiv' style="display:none">
+                        <div style="font-size:28px"><b>Stars collected:</b></div>
+                        <br><br>
+                         <div id = "stars" > </div>
+                    </div>
+                </div>
+               
+            <div class="row" id="sidebarInstructions">
+                    <br>
+                <div class="col-md">
+                    <p id="sidebarInstructions-1" class="text-l">
+                    In the following study, you will be presented with a series of 20 different grids, where each tile of the grid is an option you can choose to sample. Different tiles earn you different amounts of points, with the points based on the <b>location of the tile </b>on the grid. <b>Tiles in similar locations will yield similar point values!</b> <br><br> 
+                    </p>
+
+                    <p id="sidebarInstructions-2" class="text-m" style="display:none">
+                        Try it now by clicking on the grid to the left!
+                        <br><br> 
+You can either decide to <b>click an unrevealed tile</b> to learn about its rewards or to <b>click again on a previously revealed tile</b>. You will not know how many points an unrevealed tile will give you, but you could potentially find some large rewards. If you click on a previously revealed tile, the score may change slightly, but will largely stay the same. The most recently uncovered point value is displayed, while the history of revealed points can be viewed by hovering over the tile. 
+                        <br><br> 
+                        Please note:
+                       <br> 1. Tiles are also color coded as a visual aid to help you in this task, with darker colors corresponding to larger point values.
+                       <br> 2. Tiles in similar locations will yield similar point values! The amount of points you can earn thus depends on the tiles location on the grid. 
+                           
+                    </p> 
+
+                    <p id="sidebarInstructions-3" class="text-l" style="display:none">
+                            <b>Great!</b><br> In each round, you will be awarded up to 5 stars depending on how many points you have collected. The more points you collect, the more stars you will receive, with 5 stars being the best possible score in each round. At the end of the task, we will convert the number of stars you have earned into a bonus.
+                            <br><br>
+                            <b>Click continue when you have understood all the instructions</b>  
+                    </p>
+
+                    <br>
+                    <button class='btn-primary text-xl' type="button" id="buttonInstructions" onclick="onButtonInstructionsPressed();">Continue</button>
+                </div>
+            </div>
+            <div class='row' id="bonusSidebarInstructions" style="display:none; padding:5px; border: 3px dashed orange;">
+                <div class="col-md">
+                    <h2>Bonus Round!</h2>
+                    In the bonus round, you have the same goal of getting as many points as possible. However, after <b>15 clicks</b>, you will be asked some bonus questions. You will be shown five unrevealed tiles, and asked to guess how many points you would get if you were to click them. See if you can guess them all correctly!
+                    <br><br>
+                    Afterwards, you will be asked to choose one of the five selected tiles, and then can continue to play as usual until all clicks are used up. 
+                </div>
+
+                <div class="col-md" id="bonusSidebarInstructions2" style="display:none; padding:5px; border: 3px dashed orange;">
+                    <h2>Bonus Round!</h2>
+                    Now you can finish this round as usual. Remember, you want to collect as many points as possible!
+                </div>
+        </div>
+        <div id="bonusProgress" style="display:none">
+
+                <h2>Bonus Round</h2>
+                <div id="bonusInstructions">
+                    <br>
+                    <p class="text-m">Remaining Clicks: <span id="bonusRemainingCounter">5</span></p>
+                    <br>
+                    <p class="text-l">
+                        How many points do you think you would get if you clicked this option?
+                    </p>
+
+                    <input id="valueSlider" type="range" min="0" max="50" step="1" oninput="onValueSliderChange(this.value)" onchange="onValueSliderChange(this.value)">
+                    <div class="text-m">
+                        Low
+                        <span class="spacer" style="width: 211px; display: inline-block;"></span> High
+                    </div>
+
+
+                    <br><br>
+                    <p class="text-l">How confident are you?</p>
+
+                    <br>
+
+                    <input id="confidenceSlider" type="range" min="0" max="10" step="1" oninput="onConfidenceSliderChange(this.value)" onchange="onConfidenceSliderChange(this.value)">
+
+                    <div class="text-m">
+                        Not at all
+                        <span class="spacer" style="width: 137px; display: inline-block;"></span> Highly confident
+                    </div>
+
+
+                    <br><br>
+                    <button class='btn-primary text-xl' type="button" name="button" id="buttonNextBonus" onclick="saveBonusStep();">Weiter</button>
+                </div>
+
+                <div id="bonusInstructions2" style="display:none">
+                    <br><br>
+                    <p class="text-xl">
+                     Of the five selected options, which one would you choose? Please click on it now.
+                    </p>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+        <div id="page3" style="display:none">
+            <br>
+            <h1 style="font-size=28px">Please answer a few questions about this study before proceeding. </h1>
+            
+            <div class="radio">
+            <legend style="font-size:20px">What is your task in this study?</legend>
+              <label>
+                <input type="radio" name="q1" id="q1a" value="option1" checked>
+                 &nbsp &nbsp Learn about colors
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q1" id="q1b" value="option2">
+                 &nbsp  &nbsp Gain as many points as possible 
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q1" id="q1c" value="option3" >
+                 &nbsp  &nbsp Learn where the largest reward is
+              </label>
+            </div><br>
+
+            <div class="radio">
+            <legend style="font-size:20px">How many grids are there to explore?</legend>
+              <label>
+                <input type="radio" name="q2" id="q2a" value="option1" checked>
+                 &nbsp  &nbsp 6
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q2" id="q2b" value="option2">
+                 &nbsp  &nbsp 8
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q2" id="q2c" value="option3" >
+                 &nbsp  &nbsp 10 
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q2" id="q2d" value="option3" >
+                 &nbsp  &nbsp 12
+              </label>
+            </div><br>
+
+            <div class="radio">
+            <legend style="font-size:20px">How are the points distributed?</legend>
+              <label>
+                <input type="radio" name="q3" id="q3a" value="option1" checked>
+                 &nbsp  &nbsp Randomly
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q3" id="q3b" value="option2">
+                 &nbsp  &nbsp High-value points are never next to each other
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q3" id="q3c" value="option3" >
+                 &nbsp  &nbsp High-value points are always in the same area
+              </label>
+            </div>
+            <div class="radio">
+              <label>
+                <input type="radio" name="q3" id="q3d" value="option3" >
+                 &nbsp  &nbsp High-value points tend to be in the same area
+
+              </label>
+            </div><br>
+            <p style="font-size:18px"> Only when you answered all the question correctly will you be able to start the study.</p>
+            <div>
+                <button style="font-size:28px" class='btn-primary' type="button" name="button"; onclick="instructioncheck()"; >Check answers</button>  
+            </div>
+        </div>
+
+
+        <div id="page4" style="display:none">
+            <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <center>
+            <h1 style="font-size:72px" > Very good. You have answered all questions correctly and can now start the study.</h1> <br><br>
+            </center>
+            <div >
+                <center>
+                <button style="font-size:28px" class='btn-primary' type="button" name="button"; onclick="clickStart('page4','page5')"; >Start</button>  
+            </center>
+            </div>
+        </div>
+
+    
+        <div id="page5" style="display:none; text-align: center;">
+            <br>
+            <div id="roundResults"> You have explored this grid. There are 11 grids remaining to be explored.</div>
+                <br><br>
+            <div class="text-l" id="bonusIntroInstructions" style="display:none; padding:5px; border: 3px dashed orange;">
+                <h2>Bonus round!</h2>
+                                    In the bonus round, you have the same goal of getting as many points as possible. However, after <b>15 clicks</b>, you will be asked some bonus questions. You will be shown five unrevealed options, and asked to guess how many points you would get if you were to click them. See if you can guess them all correctly! Afterwards, you will be asked to choose one of the five selected options, and then can continue to play as usual until all clicks are used up. <br><b> Remember! </b> Your goal is still to collect as many points as possible in each grid!
+                <br><br>
+            
+            </div>
+            <div style="text-align: center">
+                <button style="font-size:28px; bottom: 100px;" class='btn-primary' type="button" id="nextTrialButton"; onclick="nexttrial()"; >Continue</button>  
+            </div>
+    </div>
+
+        <div id="page6" style="display:none; text-align: center;">
+            <div class="page-header" id="thanksforcompleting" >
+                <h1> <font size="4">Thank you for participating in our experiment.</font> </h1>
+            </div>
+            <br><br>
+            <div style="text-align: center">
+                <button style="font-size:28px; bottom: 100px;" class='btn-primary' type="button" id="finishButton"; onclick="senddata()"; >Done</button>  
+            </div>
+        </div>
+      </div>
+      <div id="rt-end"  style="display:none;">
+            <br><br>
+            < <div style="width:50px;margin:0 auto; display:block" id = 'restartExperimentButton'>
+            <a href="quest.html" id="restartExperiment"><button class ="btn btn-success">Restart Experiment</button></a> 
+          </div>
+        </div>
+
+        <script src="js/gridSearch.js" charset="utf-8"></script>
+    </body>
+</html>
